@@ -1,0 +1,28 @@
+{
+    "name": "thangcx-1985/deployer-chatwork-notification",
+    "description": "deployer's Chatwork notification",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "deployer",
+        "notification",
+        "chatwork"
+    ],
+    "homepage": "https://github.com/thangcx-1985/deployer-chatwork-notification",
+    "authors": [
+        {
+            "name": "Chu Xuan Thang",
+            "email": "chu.xuan.thang@sun-asterisk.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {},
+    "autoload": {
+        "files": [
+            "autoload.php"
+        ]
+    },
+    "replace": {
+        "deployer/recipes": "self.version"
+    }
+}
