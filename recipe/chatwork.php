@@ -1,66 +1,5 @@
 <?php
-/*
-## Installing
 
-<a href="https://slack.com/oauth/authorize?&client_id=113734341365.225973502034&scope=incoming-webhook"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
-
-Require slack recipe in your `deploy.php` file:
-
-```php
-require 'contrib/slack.php';
-```
-
-Add hook on deploy:
-
-```php
-before('deploy', 'slack:notify');
-```
-
-## Configuration
-
-- `slack_webhook` – slack incoming webhook url, **required**
-  ```
-  set('slack_webhook', 'https://hooks.slack.com/...');
-  ```
-- `slack_title` – the title of application, default `{{application}}`
-- `slack_text` – notification message template, markdown supported
-  ```
-  set('slack_text', '_{{user}}_ deploying `{{branch}}` to *{{target}}*');
-  ```
-- `slack_success_text` – success template, default:
-  ```
-  set('slack_success_text', 'Deploy to *{{target}}* successful');
-  ```
-- `slack_failure_text` – failure template, default:
-  ```
-  set('slack_failure_text', 'Deploy to *{{target}}* failed');
-  ```
-
-- `slack_color` – color's attachment
-- `slack_success_color` – success color's attachment
-- `slack_failure_color` – failure color's attachment
-
-## Usage
-
-If you want to notify only about beginning of deployment add this line only:
-
-```php
-before('deploy', 'slack:notify');
-```
-
-If you want to notify about successful end of deployment add this too:
-
-```php
-after('deploy:success', 'slack:notify:success');
-```
-
-If you want to notify about failed deployment add this too:
-
-```php
-after('deploy:failed', 'slack:notify:failure');
-```
-
- */
 namespace Deployer;
 
 use Deployer\Utility\Httpie;
@@ -74,15 +13,16 @@ set('chatwork_title', function () {
 });
 
 // Deploy message
-set('chatwork_text', '_{{user}}_ deploying `{{branch}}` to *{{target}}*');
-set('chatwork_success_text', 'Deploy to *{{target}}* successful');
-set('chatwork_failure_text', 'Deploy to *{{target}}* failed');
-set('chatwork_rollback_text', '_{{user}}_ rolled back changes on *{{target}}*');
+set('chatwork_text', '[info][title]Deployer on {{target}}[/title]{{user}} is deploying branch {{branch}} to {{target}} envirement[/info]');
+set('chatwork_success_text', '[info][title]Deployer on {{target}}[/title]Deployment is successful[/info]');
+set('chatwork_failure_text', '[info][title]Deployer on {{target}}[/title]Deployment is failed[/info]');
+set('chatwork_rollback_text', '[info][title]Deployer on {{target}}[/title]Deployment is rolling back[/info]');
 
 // Task
 desc('Notifying Chatwork');
 task('chatwork:notify', function () {
     if (!get('chatwork_room_id', false) || !get('chatwork_api_token', false)) {
+
         return;
     }
     Httpie::post(get('chatwork_base_url') . '/rooms/' . get('chatwork_room_id') . '/messages')
@@ -91,9 +31,9 @@ task('chatwork:notify', function () {
 })
     ->once()
     ->shallow()
-    ->hidden();
+    ->setPrivate();
 
-desc('Notifying Chatwork about deploy finish');
+desc('Notifying Chatwork about deploy success');
 task('chatwork:notify:success', function () {
     if (!get('chatwork_room_id', false) || !get('chatwork_api_token', false)) {
         return;
@@ -104,4 +44,30 @@ task('chatwork:notify:success', function () {
 })
     ->once()
     ->shallow()
-    ->hidden();
+    ->setPrivate();
+
+desc('Notifying Chatwork about deploy failed');
+task('chatwork:notify:failed', function () {
+    if (!get('chatwork_room_id', false) || !get('chatwork_api_token', false)) {
+        return;
+    }
+    Httpie::post(get('chatwork_base_url') . '/rooms/' . get('chatwork_room_id') . '/messages')
+        ->header('X-ChatWorkToken: ' . get('chatwork_api_token'))
+        ->form(['body' => get('chatwork_failure_text')])->send();
+})
+    ->once()
+    ->shallow()
+    ->setPrivate();
+
+desc('Notifying Chatwork about deploy roll back');
+task('chatwork:notify:rollback', function () {
+    if (!get('chatwork_room_id', false) || !get('chatwork_api_token', false)) {
+        return;
+    }
+    Httpie::post(get('chatwork_base_url') . '/rooms/' . get('chatwork_room_id') . '/messages')
+        ->header('X-ChatWorkToken: ' . get('chatwork_api_token'))
+        ->form(['body' => get('chatwork_rollback_text')])->send();
+})
+    ->once()
+    ->shallow()
+    ->setPrivate();
