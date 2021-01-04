@@ -3,33 +3,41 @@ This repository contains chatwork recipes to integrate with deployer.
 
 ## Installing
 ```
-composer require ippey/deployer-chatwork-recipe --dev
+composer require thangcx-1985/deployer-chatwork-notification
 ```
 
 Include recipes in deploy.php file.
 
 ```php
-require 'recipe/chatwork.php';
+require 'vendor/thangcx-1985/deployer-chatwork-notification/recipe/chatwork.php';
 ```
 
 ## Configuration
 
 - `chatwork_api_token` – chatwork api token, **required** 
 - `chatwork_room_id` – chatwork room ID, **required** 
-- `chatwork_title` – the title of application, default `{{application}}`
-- `chatwork_text` – notification message template, markdown supported
+- `chatwork_text` – notification message template, default:
   ```
-  _{{user}}_ deploying `{{branch}}` to *{{target}}*
+  [info][title]Deployer on {{target}}[/title]{{user}} is deploying branch {{branch}} to {{target}} envirement[/info]
   ```
 - `chatwork_success_text` – success template, default:
   ```
-  Deploy to *{{target}}* successful
+  [info][title]Deployer on {{target}}[/title]Deployment is successful[/info]
   ```
-
+- `chatwork_failure_text` – failure template, default:
+  ```
+  [info][title]Deployer on {{target}}[/title]Deployment is failed[/info]
+  ```
+- `chatwork_rollback_text` – rollback template, default:
+  ```
+  [info][title]Deployer on {{target}}[/title]Deployment is rolling back[/info]
+  ```
 ## Tasks
 
 - `chatwork:notify` – send message to chatwork
 - `chatwork:notify:success` – send success message to chatwork
+- `chatwork:notify:failed` – send failed message to chatwork
+- `chatwork:notify:rollback` – send rolling back message to chatwork
 
 ## Usage
 
