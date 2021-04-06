@@ -12,9 +12,18 @@ set('chatwork_title', function () {
     return get('application', 'Project');
 });
 
+set('pull-request', function () {
+    $gitLog = explode("\n", runLocally('git log -1 --pretty=%B'));
+    $message = $gitLog[2];
+    $pullNo = str_replace('#', '', explode(' ', $gitLog[0])[3]);
+
+    return "\n" . $message . "\n" . rtrim(get('project_link'), '/') . '/pull/' . $pullNo;
+});
+
+
 // Deploy message
 set('chatwork_text', '[info][title]Deployer on {{target}}[/title]{{user}} is deploying branch {{branch}} to {{target}} envirement[/info]');
-set('chatwork_success_text', '[info][title]Deployer on {{target}}[/title]Deployment is successful[/info]');
+set('chatwork_success_text', '[info][title]Deployer on {{target}}[/title]Deployment is successful {{pull-request}}[/info]');
 set('chatwork_failure_text', '[info][title]Deployer on {{target}}[/title]Deployment is failed[/info]');
 set('chatwork_rollback_text', '[info][title]Deployer on {{target}}[/title]Deployment is rolling back[/info]');
 
@@ -22,7 +31,6 @@ set('chatwork_rollback_text', '[info][title]Deployer on {{target}}[/title]Deploy
 desc('Notifying Chatwork');
 task('chatwork:notify', function () {
     if (!get('chatwork_room_id', false) || !get('chatwork_api_token', false)) {
-
         return;
     }
     Httpie::post(get('chatwork_base_url') . '/rooms/' . get('chatwork_room_id') . '/messages')
